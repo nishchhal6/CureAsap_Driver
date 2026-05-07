@@ -37,7 +37,7 @@ class _DriverMapScreenState extends State<DriverMapScreen> {
   void initState() {
     super.initState();
     // initState ke andar
-    _polylinePoints = PolylinePoints(); // Ab yahan API key nahi deni hoti
+    _polylinePoints = PolylinePoints(apiKey: _apiKey); // Ab yahan API key nahi deni hoti
 
     final state = Provider.of<DriverState>(context, listen: false);
     final data = state.activeRequestData;
@@ -159,7 +159,6 @@ class _DriverMapScreenState extends State<DriverMapScreen> {
         destination: PointLatLng(_destinationLocation.latitude, _destinationLocation.longitude),
         mode: TravelMode.driving,
       ),
-      googleApiKey: _apiKey, // 👈 YE CHECK KARO: Kuch versions mein 'apiKey' hota hai, kuch mein 'googleApiKey'
     );
 
     if (result.points.isNotEmpty) {
