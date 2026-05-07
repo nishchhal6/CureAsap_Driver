@@ -76,13 +76,12 @@ class _DriverMapScreenState extends State<DriverMapScreen> {
       await Geolocator.requestPermission();
     }
 
-    _positionStream =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.bestForNavigation,
-            distanceFilter: 2,
-          ),
-        ).listen((Position position) {
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.bestForNavigation,
+        distanceFilter: 15, // 👈 2 se badhakar 15 karo taaki lag kam ho
+      ),
+    ).listen((Position position) {
           if (!mounted) return;
 
           LatLng newPos = LatLng(position.latitude, position.longitude);

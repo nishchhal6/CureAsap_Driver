@@ -158,38 +158,52 @@ class DriverState extends ChangeNotifier {
     if (activeRequestData == null) return;
 
     try {
+      // 1. Data prepare karo
+      final updateData = {
+        'status': newStatus,
+      };
+
+      // 2. Agar status completed hai, toh Hospital details add karo
+      if (newStatus == 'completed') {
+        updateData['hospital_id'] = activeRequestData!['hospital_id'];
+        updateData['hospital_name'] = activeRequestData!['hospital_name'];
+        updateData['completed_at'] = DateTime.now().toIso8601String();
+      }
+
+      // 3. Database update
       await _supabase
           .from('emergency_requests')
-          .update({
-            'status': newStatus,
-          }) // 'newStatus' ki value SQL list se match honi chahiye
+          .update(updateData)
           .eq('id', activeRequestData!['id']);
 
-      // UI update ke liye
-
       notifyListeners();
-
-      print("✅ Status Updated to: $newStatus");
     } catch (e) {
-      print("❌ Update Error: $e");
+      print("Update Error: $e");
     }
   }
-
-  // Emergency complete hone par clear karna
 
   Future<void> clearEmergency() async {
     if (activeRequestData == null) return;
 
     try {
+      // 1. Pehle check karo ki activeRequestData mein hospital_id hai ya nahi
+      print("DEBUG: Active Hospital ID is: ${activeRequestData!['hospital_id']}");
+
+      // 2. Emergency Requests table ko update karo
       await _supabase
           .from('emergency_requests')
-          .update({'status': 'completed'})
+          .update({
+        'status': 'completed',
+        'hospital_id': activeRequestData!['hospital_id'],   // ✅ ID pass karo
+        'hospital_name': activeRequestData!['hospital_name'], // ✅ Name pass karo
+      })
           .eq('id', activeRequestData!['id']);
 
+      // 3. Agar aap direct records table mein insert kar rahe ho toh wahan bhi bhenjo
+      // (Aapke case mein ye database trigger se ho raha hoga ya finish button se)
+
       hasActiveEmergency = false;
-
       activeRequestData = null;
-
       notifyListeners();
     } catch (e) {
       print("Clear Emergency Error: $e");
